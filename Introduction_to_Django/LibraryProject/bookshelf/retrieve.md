@@ -1,3 +1,7 @@
-# RETRIEVE
-books = Book.objects.all()
-print(f"RETRIEVE: Found {books.count()} books")
+### RETRIEVE Operation
+
+**Command:**
+```python
+from bookshelf.models import Book
+book = Book.objects.get(title="1984")
+print(book.title, book.author, book.publication_year)
