@@ -120,6 +120,7 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # Authentication redirect URLs
+LOGIN_URL = '/relationship/login/'  # Use your custom login URL
 LOGIN_REDIRECT_URL = '/relationship/books/'    # After login, go to books list
 LOGOUT_REDIRECT_URL = '/relationship/login/'   # After logout, go to login page
 
