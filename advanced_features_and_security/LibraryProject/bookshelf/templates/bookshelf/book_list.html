@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Book List</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { border-collapse: collapse; width: 100%; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        .btn { padding: 5px 10px; text-decoration: none; margin: 2px; }
+        .btn-edit { background-color: #2196F3; color: white; }
+        .btn-delete { background-color: #f44336; color: white; }
+        .btn-create { background-color: #4CAF50; color: white; padding: 10px 15px; }
+        .messages { padding: 10px; margin: 10px 0; background-color: #d4edda; }
+    </style>
+</head>
+<body>
+    <h1>Book Library</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="messages">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+    
+    {% if perms.bookshelf.can_create %}
+        <a href="{% url 'book_create' %}" class="btn btn-create">Add New Book</a>
+    {% endif %}
+    
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>Year</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in books %}
+            <tr>
+                <td>{{ book.title }}</td>
+                <td>{{ book.author }}</td>
+                <td>{{ book.publication_year }}</td>
+                <td>
+                    {% if perms.bookshelf.can_edit %}
+                        <a href="{% url 'book_edit' book.pk %}" class="btn btn-edit">Edit</a>
+                    {% endif %}
+                    {% if perms.bookshelf.can_delete %}
+                        <a href="{% url 'book_delete' book.pk %}" class="btn btn-delete">Delete</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4">No books available.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
