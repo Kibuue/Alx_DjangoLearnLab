@@ -5,6 +5,5 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('relationship/', include('relationship_app.urls')),
-    # Add this line to handle the default auth URLs
     path('accounts/login/', auth_views.LoginView.as_view(template_name='relationship_app/login.html'), name='login'),
 ]

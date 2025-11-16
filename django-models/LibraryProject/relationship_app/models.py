@@ -30,7 +30,6 @@ class Librarian(models.Model):
     def __str__(self):
         return self.name
 
-# Add UserProfile model for role-based access
 class UserProfile(models.Model):
     ROLE_CHOICES = [
         ('Admin', 'Admin'),
@@ -44,7 +43,6 @@ class UserProfile(models.Model):
     def __str__(self):
         return f"{self.user.username} - {self.role}"
 
-# Signal to automatically create UserProfile when a new user is registered
 @receiver(post_save, sender=User)
 def create_user_profile(sender, instance, created, **kwargs):
     if created:
