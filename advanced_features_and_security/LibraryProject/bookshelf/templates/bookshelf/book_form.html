@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ action }} Book</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px;
+            max-width: 600px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .errorlist {
+            color: #d32f2f;
+            list-style: none;
+            padding: 0;
+            margin: 5px 0;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .btn-cancel {
+            background-color: #f44336;
+            margin-left: 10px;
+            text-decoration: none;
+            padding: 10px 20px;
+            color: white;
+            display: inline-block;
+            border-radius: 4px;
+        }
+        .help-text {
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <h1>{{ action }} Book</h1>
+    
+    <!-- 
+    CRITICAL SECURITY: CSRF Token
+    This protects against Cross-Site Request Forgery attacks
+    Never submit a form without this token!
+    -->
+    <form method="post">
+        {% csrf_token %}
+        
+        <!-- Using Django form rendering for automatic security -->
+        {% for field in form %}
+            <div class="form-group">
+                {{ field.label_tag }}
+                {{ field }}
+                
+                <!-- Display field errors -->
+                {% if field.errors %}
+                    <ul class="errorlist">
+                        {% for error in field.errors %}
+                            <li>{{ error|escape }}</li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+                
+                <!-- Display help text -->
+                {% if field.help_text %}
+                    <p class="help-text">{{ field.help_text|escape }}</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+        
+        <!-- Display non-field errors -->
+        {% if form.non_field_errors %}
+            <ul class="errorlist">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error|escape }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        
+        <button type="submit">{{ action }} Book</button>
+        <a href="{% url 'book_list' %}" class="btn-cancel">Cancel</a>
+    </form>
+</body>
+</html>
