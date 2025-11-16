@@ -37,7 +37,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts',
     'bookshelf',
     'relationship_app',
 
@@ -131,7 +130,7 @@ LOGOUT_REDIRECT_URL = '/relationship/login/'   # After logout, go to login page
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom User Model
-AUTH_USER_MODEL = 'accounts.CustomUser'
+AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
 # Media Files
 MEDIA_URL = '/media/'
