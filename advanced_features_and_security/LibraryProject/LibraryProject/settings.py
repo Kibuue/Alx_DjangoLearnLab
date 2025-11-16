@@ -19,29 +19,31 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# -----------------------------------------------------------------------------
+# Basic / Recommended: load secrets from env vars in production
+# -----------------------------------------------------------------------------
+# SECRET_KEY should be set as an environment variable in production.
+# Example: export DJANGO_SECRET_KEY='your-production-secret'
+SECRET_KEY = os.environ.get(
+    "DJANGO_SECRET_KEY",
+    "django-insecure-f_k_i)d89r!95w$ow3hwfz$o#wk5j*%tcjve#jxa=ae*7_5$$_"
+)
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
+# Debug should be False in production. Use an environment variable to control it.
+DEBUG = os.environ.get("DJANGO_DEBUG", "True") == "True"
 
-# SECURITY WARNING: keep the secret key used in production secret!
-# TODO: In production, load from environment variable
-SECRET_KEY = 'django-insecure-f_k_i)d89r!95w$ow3hwfz$o#wk5j*%tcjve#jxa=ae*7_5$$_'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-# Set to False in production
-DEBUG = True
-
-# In production, set this to your actual domain names
+# In production, set this to your actual domain names (configured below when DEBUG=False)
 ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
-
+# -----------------------------------------------------------------------------
 # Application definition
-
+# -----------------------------------------------------------------------------
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -51,15 +53,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'bookshelf',
     'relationship_app',
+    'sslserver',
+
 ]
 
 MIDDLEWARE = [
+    # SecurityMiddleware must be as high as possible to apply security headers early
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    # Clickjacking protection (X-Frame-Options header)
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -83,10 +89,9 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'LibraryProject.wsgi.application'
 
-
+# -----------------------------------------------------------------------------
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
+# -----------------------------------------------------------------------------
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -94,10 +99,9 @@ DATABASES = {
     }
 }
 
-
+# -----------------------------------------------------------------------------
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
-
+# -----------------------------------------------------------------------------
 AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
@@ -116,169 +120,96 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
+# -----------------------------------------------------------------------------
 # Internationalization
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
-
+# -----------------------------------------------------------------------------
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.2/howto/static-files/
-
+# -----------------------------------------------------------------------------
+# Static & Media files
+# -----------------------------------------------------------------------------
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
+# -----------------------------------------------------------------------------
 # Authentication redirect URLs
+# -----------------------------------------------------------------------------
 LOGIN_URL = '/relationship/login/'
 LOGIN_REDIRECT_URL = '/relationship/books/'
 LOGOUT_REDIRECT_URL = '/relationship/login/'
 
+# -----------------------------------------------------------------------------
 # Default primary key field type
-# https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
-
+# -----------------------------------------------------------------------------
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Custom User Model
+# Custom user model
 AUTH_USER_MODEL = 'bookshelf.CustomUser'
 
-# Media Files
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-
-# =====================================================
-# SECURITY SETTINGS
-# =====================================================
+# -----------------------------------------------------------------------------
+# ===================== SECURITY SETTINGS (ENFORCE HTTPS etc.) =================
+# -----------------------------------------------------------------------------
 
 # 1. HTTPS and SSL Settings
-# --------------------------
-# Force HTTPS in production (redirects all HTTP to HTTPS)
-# Set to True when deploying with HTTPS
-SECURE_SSL_REDIRECT = False  # Set to True in production with HTTPS
+# NOTE: For local development keep SECURE_SSL_REDIRECT = False to avoid requiring TLS locally.
+# In production (DEBUG=False) we enable the redirect below automatically.
+SECURE_SSL_REDIRECT = False  # Will be turned on when DEBUG=False (see block below)
 
-# Ensure cookies are only sent over HTTPS
-# Protects against man-in-the-middle attacks
-# Enable these in production with HTTPS
-SESSION_COOKIE_SECURE = False  # Set to True in production
-CSRF_COOKIE_SECURE = False     # Set to True in production
+# HSTS (HTTP Strict Transport Security)
+# Default to 0 for development. In production we enable long HSTS.
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
 
-# HTTP Strict Transport Security (HSTS)
-# Forces browsers to use HTTPS for specified duration
-# Only enable in production with HTTPS
-SECURE_HSTS_SECONDS = 0  # Set to 31536000 (1 year) in production
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False  # Set to True in production
-SECURE_HSTS_PRELOAD = False  # Set to True in production
+# 2. Cookie Security
+# These are False for development (no TLS). In production they will be set to True in the block below.
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
-
-# 2. Cross-Site Scripting (XSS) Protection
-# -----------------------------------------
-# Enable browser's built-in XSS filter
-# Adds X-XSS-Protection header
-SECURE_BROWSER_XSS_FILTER = True
-
-# Prevent MIME-sniffing attacks
-# Forces browser to respect declared content types
-# Adds X-Content-Type-Options: nosniff header
-SECURE_CONTENT_TYPE_NOSNIFF = True
-
-
-# 3. Clickjacking Protection
-# ---------------------------
-# Prevents site from being embedded in iframes
-# Protects against clickjacking attacks
-# Options: 'DENY' (no iframes) or 'SAMEORIGIN' (same domain only)
-X_FRAME_OPTIONS = 'DENY'
-
-
-# 4. CSRF (Cross-Site Request Forgery) Protection
-# ------------------------------------------------
-# CSRF protection is enabled by default via CsrfViewMiddleware
-# These settings provide additional security
-
-# Prevent JavaScript access to CSRF cookie
-# Reduces risk if XSS vulnerability exists
-CSRF_COOKIE_HTTPONLY = True
-
-# Use session storage for CSRF token (more secure than cookies)
-# Set to True for maximum security
-CSRF_USE_SESSIONS = False
-
-# Prevent CSRF cookie from being sent in cross-site requests
-# Options: 'Strict', 'Lax', or None
-CSRF_COOKIE_SAMESITE = 'Strict'
-
-# Additional CSRF trusted origins for production
-# Add your production domains here
-# CSRF_TRUSTED_ORIGINS = ['https://yourdomain.com']
-
-
-# 5. Session Security
-# -------------------
-# Prevent JavaScript access to session cookie
-# Reduces risk of session hijacking via XSS
+# Prevent JavaScript from reading session cookie
 SESSION_COOKIE_HTTPONLY = True
 
-# Strict same-site policy for session cookies
-# Prevents session cookies from being sent in cross-site requests
-SESSION_COOKIE_SAMESITE = 'Strict'
+# CSRF cookie needs to be readable by client-side JS if you rely on JS frameworks reading it.
+# Set CSRF_COOKIE_HTTPONLY = False so client-side code can read the CSRF token cookie if required.
+CSRF_COOKIE_HTTPONLY = False
 
-# Session timeout (in seconds)
-# Users logged out after 1 hour of inactivity
+# SameSite policy: 'Lax' is a safe default that works with most auth flows.
+SESSION_COOKIE_SAMESITE = 'Lax'
+CSRF_COOKIE_SAMESITE = 'Lax'
+
+# Session lifetime and behavior
 SESSION_COOKIE_AGE = 3600  # 1 hour
-
-# Session cookies expire when browser closes
-# More secure but less convenient
-# SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-
-# Regenerate session key on login
-# Prevents session fixation attacks
 SESSION_SAVE_EVERY_REQUEST = False
 
+# 3. XSS / Content Headers
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+
+# 4. Clickjacking protection
+X_FRAME_OPTIONS = 'DENY'  # or 'SAMEORIGIN' if you need framing from same origin
+
+# 5. CSRF configuration
+# Using cookies for CSRF (default). If using cross-domain requests, add your domains to CSRF_TRUSTED_ORIGINS below.
+CSRF_USE_SESSIONS = False
+CSRF_COOKIE_SAMESITE = 'Lax'
 
 # 6. Referrer Policy
-# ------------------
-# Controls how much referrer information is sent
-# 'same-origin' only sends referrer for same-origin requests
 SECURE_REFERRER_POLICY = 'same-origin'
 
+# 7. Proxy (if behind a load balancer or reverse proxy)
+# If you terminate SSL at a proxy (nginx, ELB), ensure the proxy sets X-Forwarded-Proto to 'https'.
+# Then enable the line below in production so Django treats such requests as secure.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# 7. Content Security Policy (CSP)
-# ---------------------------------
-# Note: For full CSP implementation, install django-csp package
-# pip install django-csp
-# Then add 'csp.middleware.CSPMiddleware' to MIDDLEWARE
-
-# Uncomment these after installing django-csp:
-# CSP_DEFAULT_SRC = ("'self'",)
-# CSP_SCRIPT_SRC = ("'self'",)
-# CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
-# CSP_IMG_SRC = ("'self'", "data:", "https:")
-# CSP_FONT_SRC = ("'self'",)
-# CSP_CONNECT_SRC = ("'self'",)
-# CSP_FRAME_ANCESTORS = ("'none'",)
-# CSP_BASE_URI = ("'self'",)
-# CSP_FORM_ACTION = ("'self'",)
-
-
-# 8. Additional Security Headers
-# -------------------------------
-# These are automatically handled by SecurityMiddleware
-# but can be customized if needed
-
-# Proxy SSL Header (if behind a proxy like Nginx)
-# SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
-
-
-# 9. Logging Configuration
-# -------------------------
-# Log security-related events
+# -----------------------------------------------------------------------------
+# Logging (security-related)
+# -----------------------------------------------------------------------------
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -286,7 +217,7 @@ LOGGING = {
         'file': {
             'level': 'WARNING',
             'class': 'logging.FileHandler',
-            'filename': BASE_DIR / 'security.log',
+            'filename': str(BASE_DIR / 'security.log'),
         },
         'console': {
             'level': 'INFO',
@@ -307,66 +238,73 @@ LOGGING = {
     },
 }
 
-
-# =====================================================
-# PRODUCTION vs DEVELOPMENT SETTINGS
-# =====================================================
-
+# -----------------------------------------------------------------------------
+# Production overrides: when DEBUG is False we enable HTTPS and stricter cookie policies
+# -----------------------------------------------------------------------------
 if DEBUG:
     # Development-specific settings
     print("=" * 60)
     print("⚠️  WARNING: Running in DEBUG mode!")
-    print("⚠️  Some security features are disabled for development.")
+    print("⚠️  Some security features are relaxed for development.")
     print("⚠️  NEVER use DEBUG=True in production!")
     print("=" * 60)
-    
-    # Allow any host in development
-    ALLOWED_HOSTS = ['*']
+
+    # Keep ALLOWED_HOSTS limited in dev by default to avoid accidental exposure;
+    # if you need to test with different hosts, modify ALLOWED_HOSTS locally.
+    ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
 else:
-    # Production settings
-    # Enable all security features
+    # Production settings (applied when DEBUG==False)
+    # Redirect all HTTP requests to HTTPS
     SECURE_SSL_REDIRECT = True
-    SESSION_COOKIE_SECURE = True
-    CSRF_COOKIE_SECURE = True
+
+    # HSTS (recommendation: set a long duration after testing)
     SECURE_HSTS_SECONDS = 31536000  # 1 year
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-    
-    # Restrict allowed hosts to your domain
-    ALLOWED_HOSTS = ['yourdomain.com', 'www.yourdomain.com']
-    
-    # Add your production CSRF trusted origins
+
+    # Ensure cookies are only sent over HTTPS
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+    # Cookie policies
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_HTTPONLY = False  # keep False so client-side can read CSRF token if needed
+
+    # Restrict allowed hosts to your production domains
+    ALLOWED_HOSTS = os.environ.get("DJANGO_ALLOWED_HOSTS", "yourdomain.com,www.yourdomain.com").split(',')
+
+    # CSRF trusted origins for secure cross-site requests (include scheme)
     CSRF_TRUSTED_ORIGINS = [
         'https://yourdomain.com',
         'https://www.yourdomain.com',
     ]
 
+    # Optionally: log when starting in production
+    print("Running with production security settings enabled.")
 
-# =====================================================
-# SECURITY CHECKLIST FOR PRODUCTION DEPLOYMENT
-# =====================================================
-"""
-Before deploying to production, ensure:
+# -----------------------------------------------------------------------------
+# CSP (Content Security Policy) - optional (requires django-csp)
+# -----------------------------------------------------------------------------
+# For stronger XSS protection consider enabling CSP via django-csp.
+# pip install django-csp
+# Then add 'csp.middleware.CSPMiddleware' to MIDDLEWARE and uncomment / tune these settings.
+# CSP_DEFAULT_SRC = ("'self'",)
+# CSP_SCRIPT_SRC = ("'self'",)
+# CSP_STYLE_SRC = ("'self'", "'unsafe-inline'")
+# CSP_IMG_SRC = ("'self'", "data:", "https:")
+# CSP_FONT_SRC = ("'self'",)
+# CSP_CONNECT_SRC = ("'self'",)
+# CSP_FRAME_ANCESTORS = ("'none'",)
 
-1. ✅ DEBUG = False
-2. ✅ SECRET_KEY loaded from environment variable
-3. ✅ ALLOWED_HOSTS set to specific domains
-4. ✅ SECURE_SSL_REDIRECT = True
-5. ✅ SESSION_COOKIE_SECURE = True
-6. ✅ CSRF_COOKIE_SECURE = True
-7. ✅ SECURE_HSTS_SECONDS = 31536000
-8. ✅ Use HTTPS (get SSL certificate)
-9. ✅ Configure proper database (not SQLite for production)
-10. ✅ Set up proper static file serving
-11. ✅ Configure email backend for error notifications
-12. ✅ Regular security updates (pip install -U django)
-13. ✅ Run: python manage.py check --deploy
-
-Additional recommendations:
-- Use environment variables for sensitive data
-- Implement rate limiting for authentication
-- Set up monitoring and alerting
-- Regular security audits
-- Keep dependencies updated
-- Use a web application firewall (WAF)
-"""
+# -----------------------------------------------------------------------------
+# Final notes and checklist (for your docs/README):
+# - Set DJANGO_SECRET_KEY in environment for production.
+# - Set DJANGO_DEBUG=False in production.
+# - Set DJANGO_ALLOWED_HOSTS to comma-separated production hosts.
+# - Configure a reverse proxy (nginx) to terminate TLS and set X-Forwarded-Proto header.
+# - Obtain TLS certificates (Let's Encrypt / Certbot) and configure nginx to redirect HTTP->HTTPS.
+# - Run `python manage.py check --deploy` before going live.
+# -----------------------------------------------------------------------------
