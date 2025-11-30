@@ -1,7 +1,30 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework import filters # Import standard DRF filters
+from django_filters import rest_framework as django_filters # Import the external package
 from .models import Book
 from .serializers import BookSerializer
+
+# ListView: Retrieve all books
+class BookListView(generics.ListAPIView):
+    queryset = Book.objects.all()
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    # Configure the backends
+    filter_backends = [django_filters.DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+
+    # 1. Filtering: specific fields to filter by
+    filterset_fields = ['title', 'author', 'publication_year']
+
+    # 2. Searching: fields to search using the ?search= parameter
+    # distinct=True is default, but good to know for text search
+    search_fields = ['title', 'author__name'] 
+
+    # 3. Ordering: fields valid for sorting
+    ordering_fields = ['title', 'publication_year']
+    ordering = ['title'] # Default ordering
+
 
 # ListView: Retrieve all books
 class BookListView(generics.ListAPIView):

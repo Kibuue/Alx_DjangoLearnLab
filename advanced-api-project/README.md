@@ -34,3 +34,20 @@ This project utilizes Django REST Framework's Generic Views to handle CRUD opera
 ### Testing Instructions
 1.  **Read Access:** `GET /books/` (Available to everyone).
 2.  **Write Access:** `POST /books/create/` (Requires authentication token or session).
+
+### Advanced Features: Filtering, Searching, and Ordering
+
+The API supports advanced query parameters on the book list endpoint (`/books/`).
+
+* **Filtering:**
+    * Use exact matches for fields: `title`, `author`, `publication_year`.
+    * Example: `/books/?publication_year=2024`
+
+* **Searching:**
+    * Perform text search on `title` and `author` name.
+    * Example: `/books/?search=J.K. Rowling`
+
+* **Ordering:**
+    * Sort results by `title` or `publication_year`.
+    * Use a hyphen `-` for descending order.
+    * Example: `/books/?ordering=-publication_year`
