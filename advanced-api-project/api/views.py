@@ -25,14 +25,6 @@ class BookListView(generics.ListAPIView):
     ordering_fields = ['title', 'publication_year']
     ordering = ['title'] # Default ordering
 
-
-# ListView: Retrieve all books
-class BookListView(generics.ListAPIView):
-    queryset = Book.objects.all()
-    serializer_class = BookSerializer
-    # Allow anyone to read (GET), but restrict write access (though ListAPIView is read-only by default)
-    permission_classes = [IsAuthenticatedOrReadOnly]
-
 # DetailView: Retrieve a single book by ID
 class BookDetailView(generics.RetrieveAPIView):
     queryset = Book.objects.all()

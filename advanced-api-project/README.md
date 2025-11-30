@@ -51,3 +51,14 @@ The API supports advanced query parameters on the book list endpoint (`/books/`)
     * Sort results by `title` or `publication_year`.
     * Use a hyphen `-` for descending order.
     * Example: `/books/?ordering=-publication_year`
+
+    ### Unit Testing
+
+Unit tests are located in `api/test_views.py`. They cover:
+* **CRUD Operations:** Creating, reading, updating, and deleting books.
+* **Permissions:** Verifying only authenticated users can modify data.
+* **Advanced Features:** Testing filtering, searching, and ordering logic.
+
+**To run tests:**
+```bash
+python manage.py test api
