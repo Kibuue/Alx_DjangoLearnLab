@@ -7,7 +7,7 @@ from django.views.generic import ListView, DetailView, CreateView, UpdateView, D
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.urls import reverse_lazy
 from .models import Post, Comment
-from .forms import CommentForm
+from .forms import CommentForm, PostForm
 
 def register(request):
     if request.method == 'POST':
@@ -44,8 +44,7 @@ class PostDetailView(DetailView):
 # 3. Create View: Allows creating new posts
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    fields = ['title', 'content', 'tags']
-    # Default template: blog/post_form.html
+    form_class = PostForm
 
     # Override form_valid to set the author automatically
     def form_valid(self, form):
@@ -55,9 +54,8 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 # 4. Update View: Allows editing posts
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    fields = ['title', 'content', 'tags']
-    # Default template: blog/post_form.html (shared with CreateView)
-
+    form_class = PostForm
+   
     def form_valid(self, form):
         form.instance.author = self.request.user
         return super().form_valid(form)
