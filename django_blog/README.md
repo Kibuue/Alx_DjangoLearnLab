@@ -74,3 +74,11 @@ Alx_DjangoLearnLab/
     - Configured URLs for Login, Logout, Register, and Profile.
     - Added templates: `login.html`, `register.html`, `logout.html`, `profile.html`.
     - Secured forms with CSRF tokens.
+
+
+- **Task 2:** Implemented CRUD functionality (Create, Read, Update, Delete).
+    - Added `PostListView`, `PostDetailView`, `PostCreateView`, `PostUpdateView`, `PostDeleteView`.
+    - Configured URL routing for posts (`/post/new/`, `/post/<pk>/`, etc.).
+    - Implemented `LoginRequiredMixin` to protect views.
+    - Implemented `UserPassesTestMixin` so only authors can edit/delete their own work.
+    - Created CRUD templates: `post_list`, `post_detail`, `post_form`, `post_confirm_delete`.
