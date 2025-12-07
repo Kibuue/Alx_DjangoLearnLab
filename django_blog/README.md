@@ -67,3 +67,10 @@ Alx_DjangoLearnLab/
             │   └── styles.css # Custom styling
             └── js/
                 └── scripts.js # Custom JavaScript
+
+- **Task 1:** Implemented User Authentication.
+    - Created `CustomUserCreationForm` to capture emails.
+    - Added Views for Register and Profile management.
+    - Configured URLs for Login, Logout, Register, and Profile.
+    - Added templates: `login.html`, `register.html`, `logout.html`, `profile.html`.
+    - Secured forms with CSRF tokens.
