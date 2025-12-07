@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Q
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .forms import CustomUserCreationForm
@@ -43,7 +44,7 @@ class PostDetailView(DetailView):
 # 3. Create View: Allows creating new posts
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
-    fields = ['title', 'content']
+    fields = ['title', 'content', 'tags']
     # Default template: blog/post_form.html
 
     # Override form_valid to set the author automatically
@@ -54,7 +55,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 # 4. Update View: Allows editing posts
 class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Post
-    fields = ['title', 'content']
+    fields = ['title', 'content', 'tags']
     # Default template: blog/post_form.html (shared with CreateView)
 
     def form_valid(self, form):
@@ -115,3 +116,25 @@ class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def test_func(self):
         comment = self.get_object()
         return self.request.user == comment.author
+
+def search(request):
+    query = request.GET.get('q')
+    results = []
+    if query:
+        results = Post.objects.filter(
+            Q(title__icontains=query) | 
+            Q(content__icontains=query) |
+            Q(tags__name__icontains=query)
+        ).distinct()
+    
+    return render(request, 'blog/search_results.html', {'query': query, 'results': results})
+
+class PostByTagListView(ListView):
+    model = Post
+    template_name = 'blog/post_list.html'
+    context_object_name = 'posts'
+    ordering = ['-published_date']
+
+    def get_queryset(self):
+        slug = self.kwargs.get('tag_slug')
+        return Post.objects.filter(tags__slug=slug).order_by('-published_date')

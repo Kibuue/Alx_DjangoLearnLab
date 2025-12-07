@@ -12,6 +12,10 @@
     <header>
         <nav>
             <ul>
+                <form action="{% url 'search' %}" method="GET" style="display:inline; float:right;">
+                    <input type="text" name="q" placeholder="Search posts..." required>
+                    <button type="submit">Search</button>
+                </form>
                 <li><a href="{% url 'home' %}">Home</a></li>
                 <li><a href="{% url 'posts' %}">Blog Posts</a></li>
                 <li><a href="{% url 'login' %}">Login</a></li>

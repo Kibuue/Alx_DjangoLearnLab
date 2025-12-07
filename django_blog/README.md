@@ -82,3 +82,20 @@ Alx_DjangoLearnLab/
     - Implemented `LoginRequiredMixin` to protect views.
     - Implemented `UserPassesTestMixin` so only authors can edit/delete their own work.
     - Created CRUD templates: `post_list`, `post_detail`, `post_form`, `post_confirm_delete`.
+
+- **Task 3:** Implemented Comment System.
+    - Created `Comment` model linked to Post and User.
+    - Added `CommentCreateView`, `CommentUpdateView`, and `CommentDeleteView`.
+    - Integrated comments display into `post_detail.html`.
+    - Created templates for adding, editing, and deleting comments.
+    - Configured URLs: `/post/<id>/comments/new/`, `/comment/<id>/update/`, etc.
+
+- **Task 4:** Implemented Advanced Features (Tagging & Search).
+    - Integrated `django-taggit` for tag management.
+    - Updated `Post` model with `TaggableManager`.
+    - Implemented `search` view using `Q` objects for querying title, content, and tags.
+    - Added `PostByTagListView` to filter posts by tag.
+    - Added Search Bar to `base.html`.
+    - Created `search_results.html` and updated post templates to display clickable tags.
+
+    

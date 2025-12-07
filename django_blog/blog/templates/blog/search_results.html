@@ -1,0 +1,19 @@
+{% extends "blog/base.html" %}
+{% block content %}
+<h2>Search Results for "{{ query }}"</h2>
+
+{% if results %}
+{% for post in results %}
+<article class="media content-section">
+    <div class="media-body">
+        <h3><a class="article-title" href="{% url 'post-detail' post.id %}">{{ post.title }}</a></h3>
+        <p class="article-content">{{ post.content|truncatewords:30 }}</p>
+        <small class="text-muted">Posted by {{ post.author }} on {{ post.published_date|date:"F d, Y" }}</small>
+    </div>
+</article>
+{% endfor %}
+{% else %}
+<p>No posts found matching your query.</p>
+<a href="{% url 'posts' %}">Go back to all posts</a>
+{% endif %}
+{% endblock %}
